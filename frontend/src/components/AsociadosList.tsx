@@ -47,7 +47,7 @@ const AsociadosList: React.FC = () => {
           className="refresh-button"
           title="Actualizar lista"
         >
-          🔄 Actualizar
+           Actualizar
         </button>
       </div>
       

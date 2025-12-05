@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test - COAVANCOL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .info {
+            border-color: #17a2b8;
+            background-color: #d1ecf1;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-200 { background: #28a745; color: white; }
+        .status-400 { background: #ffc107; color: black; }
+        .status-404 { background: #fd7e14; color: white; }
+        .status-500 { background: #dc3545; color: white; }
+        .loading {
+            color: #007bff;
+            font-style: italic;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        .custom-test {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+        .custom-test input, .custom-test select {
+            width: 200px;
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .custom-test label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 API Test - COAVANCOL</h1>
+        <p style="text-align: center; color: #666;">Backend URL: <strong>http://localhost:3001</strong></p>
+    </div>
+
+    <!-- Health Check -->
+    <div class="container test-section">
+        <h2>1. Health Check</h2>
+        <button class="test-button" onclick="testHealth()">Probar Health Check</button>
+        <div id="health-response" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Obtener Asociados -->
+    <div class="container test-section">
+        <h2>2. Obtener Todos los Asociados</h2>
+        <button class="test-button" onclick="testGetAsociados()">Obtener Asociados</button>
+        <div id="asociados-response" class="response" style="display: none;"></div>
+    </div>
+
+    <!-- Actualizar Estado -->
+    <div class="container test-section">
+        <h2>3. Actualizar Estado del Pipeline</h2>
+        
+        <h3>Pruebas Predefinidas:</h3>
+        <button class="test-button" onclick="testUpdateEstadoValido()">✅ Estado Válido</button>
+        <button class="test-button" onclick="testUpdateEstadoInvalido()">❌ Estado Inválido</button>
+        <button class="test-button" onclick="testUpdateEstadoSinAporte()">🚫 Sin Aporte 49,900</button>
+        <button class="test-button" onclick="testTransicionNoPermitida()">⛔ Transición No Permitida</button>
+        <button class="test-button" onclick="testAsociadoNoEncontrado()">🔍 Asociado No Encontrado</button>
+        
+        <div id="update-response" class="response" style="display: none;"></div>
+
+        <div class="custom-test">
+            <h3>Prueba Personalizada:</h3>
+            <div>
+                <label>ID Asociado:</label>
+                <input type="text" id="custom-id" placeholder="Ej: asoc001" value="asoc001">
+            </div>
+            <div>
+                <label>Nuevo Estado:</label>
+                <select id="custom-estado">
+                    <option value="Prospecto">Prospecto</option>
+                    <option value="Expediente en Construcción">Expediente en Construcción</option>
+                    <option value="Pendiente Jurídico">Pendiente Jurídico</option>
+                    <option value="Pendiente Cierre de Crédito">Pendiente Cierre de Crédito</option>
+                    <option value="Pendiente Firma y Litivo">Pendiente Firma y Litivo</option>
+                    <option value="Pendiente Revisión Abogado">Pendiente Revisión Abogado</option>
+                    <option value="Cartera Activa">Cartera Activa</option>
+                    <option value="Desembolsado/Finalizado">Desembolsado/Finalizado</option>
+                </select>
+            </div>
+            <button class="test-button" onclick="testCustomUpdate()">Enviar Prueba Personalizada</button>
+        </div>
+    </div>
+
+    <!-- Ejecutar Todas las Pruebas -->
+    <div class="container test-section">
+        <h2>4. Ejecutar Todas las Pruebas</h2>
+        <button class="test-button" onclick="runAllTests()" style="background: #28a745;">🚀 Ejecutar Todas las Pruebas</button>
+        <div id="all-tests-response" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+
+        // Función helper para mostrar respuestas
+        function showResponse(elementId, data, status, isSuccess = null) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            
+            let className = 'response';
+            let statusClass = '';
+            
+            if (isSuccess === true) {
+                className += ' success';
+                statusClass = 'status-200';
+            } else if (isSuccess === false) {
+                className += ' error';
+                statusClass = 'status-' + (status >= 400 && status < 500 ? '400' : '500');
+            } else {
+                statusClass = 'status-' + status;
+            }
+            
+            element.className = className;
+            
+            const statusBadge = status ? `<span class="status ${statusClass}">${status}</span>` : '';
+            
+            element.innerHTML = `${statusBadge}\n${JSON.stringify(data, null, 2)}`;
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'response info';
+            element.innerHTML = '<span class="loading">⏳ Cargando...</span>';
+        }
+
+        // Test 1: Health check
+        async function testHealth() {
+            showLoading('health-response');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showResponse('health-response', data, response.status, response.ok);
+            } catch (error) {
+                showResponse('health-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Test 2: Obtener asociados
+        async function testGetAsociados() {
+            showLoading('asociados-response');
+            try {
+                const response = await fetch(`${API_BASE}/asociados`);
+                const data = await response.json();
+                const summary = Array.isArray(data) ? 
+                    { total_asociados: data.length, primer_asociado: data[0] } : 
+                    data;
+                showResponse('asociados-response', summary, response.status, response.ok);
+            } catch (error) {
+                showResponse('asociados-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Test 3: Actualizar estado válido
+        async function testUpdateEstadoValido() {
+            showLoading('update-response');
+            try {
+                const payload = {
+                    asociadoId: "asoc001",
+                    nuevoEstado: "Expediente en Construcción"
+                };
+                
+                const response = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResponse('update-response', data, response.status, response.ok);
+            } catch (error) {
+                showResponse('update-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Test 4: Actualizar estado inválido
+        async function testUpdateEstadoInvalido() {
+            showLoading('update-response');
+            try {
+                const payload = {
+                    asociadoId: "asoc001",
+                    nuevoEstado: "Estado No Válido"
+                };
+                
+                const response = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResponse('update-response', data, response.status, false);
+            } catch (error) {
+                showResponse('update-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Test 5: Validación aporte 49900
+        async function testUpdateEstadoSinAporte() {
+            showLoading('update-response');
+            try {
+                const payload = {
+                    asociadoId: "asoc001", // Tiene aporte_49900_pagado: false
+                    nuevoEstado: "Pendiente Jurídico"
+                };
+                
+                const response = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResponse('update-response', data, response.status, false);
+            } catch (error) {
+                showResponse('update-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Test 6: Transición no permitida
+        async function testTransicionNoPermitida() {
+            showLoading('update-response');
+            try {
+                const payload = {
+                    asociadoId: "asoc002", // Está en "Expediente en Construcción"
+                    nuevoEstado: "Cartera Activa" // Salta varios estados
+                };
+                
+                const response = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResponse('update-response', data, response.status, false);
+            } catch (error) {
+                showResponse('update-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Test 7: Asociado no encontrado
+        async function testAsociadoNoEncontrado() {
+            showLoading('update-response');
+            try {
+                const payload = {
+                    asociadoId: "asoc999",
+                    nuevoEstado: "Prospecto"
+                };
+                
+                const response = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResponse('update-response', data, response.status, false);
+            } catch (error) {
+                showResponse('update-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Prueba personalizada
+        async function testCustomUpdate() {
+            showLoading('update-response');
+            try {
+                const asociadoId = document.getElementById('custom-id').value;
+                const nuevoEstado = document.getElementById('custom-estado').value;
+                
+                if (!asociadoId || !nuevoEstado) {
+                    showResponse('update-response', { error: 'Por favor complete todos los campos' }, 'ERROR', false);
+                    return;
+                }
+                
+                const payload = { asociadoId, nuevoEstado };
+                
+                const response = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResponse('update-response', data, response.status, response.ok);
+            } catch (error) {
+                showResponse('update-response', { error: error.message }, 'ERROR', false);
+            }
+        }
+
+        // Ejecutar todas las pruebas
+        async function runAllTests() {
+            const element = document.getElementById('all-tests-response');
+            element.style.display = 'block';
+            element.className = 'response info';
+            element.innerHTML = '<span class="loading">🚀 Ejecutando todas las pruebas...</span>';
+            
+            const results = [];
+            
+            try {
+                // Health check
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                results.push({ test: 'Health Check', status: healthResponse.status, success: healthResponse.ok });
+                
+                // Get asociados
+                const asociadosResponse = await fetch(`${API_BASE}/asociados`);
+                results.push({ test: 'Obtener Asociados', status: asociadosResponse.status, success: asociadosResponse.ok });
+                
+                // Update estado válido
+                const validResponse = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ asociadoId: "asoc001", nuevoEstado: "Expediente en Construcción" })
+                });
+                results.push({ test: 'Actualizar Estado Válido', status: validResponse.status, success: validResponse.ok });
+                
+                // Update estado inválido
+                const invalidResponse = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ asociadoId: "asoc001", nuevoEstado: "Estado No Válido" })
+                });
+                results.push({ test: 'Actualizar Estado Inválido', status: invalidResponse.status, success: !invalidResponse.ok });
+                
+                // Validación aporte
+                const aporteResponse = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ asociadoId: "asoc001", nuevoEstado: "Pendiente Jurídico" })
+                });
+                results.push({ test: 'Validación Aporte 49,900', status: aporteResponse.status, success: !aporteResponse.ok });
+                
+                // Transición no permitida
+                const transResponse = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ asociadoId: "asoc002", nuevoEstado: "Cartera Activa" })
+                });
+                results.push({ test: 'Transición No Permitida', status: transResponse.status, success: !transResponse.ok });
+                
+                // Asociado no encontrado
+                const notFoundResponse = await fetch(`${API_BASE}/updateEstadoPipeline`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ asociadoId: "asoc999", nuevoEstado: "Prospecto" })
+                });
+                results.push({ test: 'Asociado No Encontrado', status: notFoundResponse.status, success: !notFoundResponse.ok });
+                
+                const passedTests = results.filter(r => r.success).length;
+                const totalTests = results.length;
+                
+                element.className = passedTests === totalTests ? 'response success' : 'response error';
+                element.innerHTML = `📊 Resumen de Pruebas:\n\n${results.map(r => 
+                    `${r.success ? '✅' : '❌'} ${r.test}: ${r.status}`
+                ).join('\n')}\n\n🎯 Resultado: ${passedTests}/${totalTests} pruebas pasaron`;
+                
+            } catch (error) {
+                element.className = 'response error';
+                element.innerHTML = `❌ Error ejecutando pruebas: ${error.message}`;
+            }
+        }
+
+        // Auto-ejecutar health check al cargar la página
+        window.onload = function() {
+            setTimeout(testHealth, 500);
+        };
+    </script>
+</body>
+</html>
